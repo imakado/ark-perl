@@ -5,7 +5,6 @@ use Mouse;
 use Data::UUID;
 use Digest::SHA1 qw/ sha1_hex /;
 use List::MoreUtils qw/ any /;
-use MouseX::AttributeHelpers;
 
 has 'namespace' => (
     is       => 'rw',
@@ -37,18 +36,12 @@ has 'state' => (
 );
 
 has 'attribute_holder' => (
-    metaclass => 'Collection::Hash',
     is        => 'rw',
     isa       => 'HashRef',
     default   => sub { +{} },
-    provides  => {
-        clear  => '_clear_attributes',
-        delete => '_remove_attribute',
-        get    => '_get_attribute',
-        set    => '_set_attribute',
-        exists => '_has_attribute'
-    },
 );
+
+no Mouse;
 
 sub BUILDARGS {
     my ($self, $args) = @_;
@@ -59,8 +52,6 @@ sub BUILDARGS {
         context => $args->{context},
     };
 }
-
-no Mouse;
 
 sub get_instance {
     my $self = shift;
@@ -118,16 +109,14 @@ sub get_flow_id {
 sub set_attribute {
     my ($self, $key, $attribute) = @_;
     
-    $self->_set_attribute($key, $attribute);
+    $self->attribute_holder->{$key} = $attribute;
     $self->save;
 }
 
 sub remove_attribute {
     my ($self, $key) = @_;
 
-    my $ret = $self->_get_attribute($key);
-    
-    $self->_remove_attribute($key);
+    my $ret = delete $self->attribute_holder->{$key};
     $self->save;
 
     return $ret;
@@ -136,18 +125,21 @@ sub remove_attribute {
 sub get_attribute {
     my $self = shift;
     my $key = shift;
-    $self->_get_attribute($key);
+
+    $self->attribute_holder->{$key}
 }
 
 sub has_attribute {
     my $self = shift;
     my $key = shift;
-    $self->_has_attribute($key);
+
+    exists $self->attribute_holder->{$key};
 }
 
 sub clear_attributes {
     my $self = shift;
-    $self->_clear_attributes;
+
+    $self->attribute_holder( +{} );
     $self->save;
 }
 
