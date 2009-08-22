@@ -9,6 +9,9 @@ has 'continue' => (
     is       => 'rw',
     isa      => 'Ark::Flow::Continue',
     required => 1,
+
+    handles => [ qw( set_state get_attribute set_attribute
+                     remove_attribute clear_attributes has_attribute  ) ],
 );
 
 has 'context' => (
@@ -127,7 +130,6 @@ sub add_state {
     return $self;
 }
 
-
 sub remove_state {
     my $self = shift;
     my $state = shift;
@@ -138,31 +140,6 @@ sub remove_state {
 
 sub get_continue {
     return shift->continue;
-}
-
-sub set_state {
-    shift->get_continue->set_state(@_);
-}
-
-
-sub get_attribute {
-    shift->get_continue->get_attribute(@_);
-}
-
-sub set_attribute {
-    shift->get_continue->set_attribute(@_);
-}
-
-sub remove_attribute {
-    shift->get_continue->set_attribute(@_);
-}
-
-sub clear_attributes {
-    shift->get_continue->clear_attributes(@_);
-}
-
-sub has_attribute {
-    shift->get_continue->has_attribute(@_);
 }
 
 1;
