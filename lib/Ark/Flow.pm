@@ -78,9 +78,9 @@ sub get_executable_action_name {
     my $state_obj = $self->get_state_obj;
     my $event_map = $state_obj->event_map;
 
-    for my $event_name (keys %{ $event_map }) {
+    while (my ($event_name, $action_name) = each %$event_map) {
         if ( $self->continue->is_happen_event( $event_name ) ) {
-            return $event_map->{$event_name};
+            return $action_name;
         }
     }
 }
