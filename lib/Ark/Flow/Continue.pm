@@ -89,7 +89,7 @@ sub is_happen_event {
 
     my $req = $self->context->request;
 
-    return any { $req->param($_) } ($event, "${event}_x", "${event}_y");
+    return any { defined $req->param($_) } ($event, "${event}_x", "${event}_y");
 }
 
 sub get_state {

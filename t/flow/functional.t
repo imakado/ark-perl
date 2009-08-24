@@ -7,7 +7,8 @@ use lib "$FindBin::Bin/lib";
 use Ark::Test 'T';
 use HTTP::Request::Common;
 
-use Smart::Comments;
+use Test::MockObject::Extends;
+
 {
     my ($res, $c) = ctx_get('/');
 
@@ -36,5 +37,44 @@ use Smart::Comments;
     ok( ! $cont->get_attribute('i'), 'cleared');
 
     isa_ok( $cont->attribute_holder , 'HASH');
+
+
+    # test for input type="image" bug
+    # when param event_name_x is 0, is_happen_event returns false.
+    # in this case, should return true.
+
+    # this probrem issue when click most left or top of <input type="image"...> submit button.
+    {
+        my $context_mock = Test::MockObject::Extends->new( $cont->context );
+        $context_mock->mock( request => sub {
+            my $hsh = { event_x => 0, };
+
+            my $m = Test::MockObject->new;
+            return $m->mock( param => sub {
+                my $self = shift;
+                $hsh->{$_[0] }
+            });
+        } );
     
+        $cont->context( $context_mock );
+
+        ok($cont->is_happen_event('event'), 'true even if $context->req->param("event_x") is 0');
+    }
+
+    {
+        my $context_mock = Test::MockObject::Extends->new( $cont->context );
+        $context_mock->mock( request => sub {
+            my $hsh = { event_y => 0, };
+
+            my $m = Test::MockObject->new;
+            return $m->mock( param => sub {
+                my $self = shift;
+                $hsh->{$_[0] }
+            });
+        } );
+    
+        $cont->context( $context_mock );
+
+        ok($cont->is_happen_event('event'), 'true even if $context->req->param("event_y") is 0');
+    }
 }
